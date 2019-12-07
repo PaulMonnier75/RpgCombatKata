@@ -104,7 +104,76 @@ namespace Tests
             character1.Attacks(character3, 100);
             character3.IsAlive.ShouldBeTrue();
             character3.Health.ShouldBe(850);
+        }
 
+        [Fact(DisplayName = "A character can join a faction")]
+        public void CharcaterJoinAFaction()
+        {
+            var character = new Character();
+            var faction = new Faction();
+
+            faction.AddMember(character);
+
+            faction.Members.ShouldContain(character);
+            character.FactionIds.ShouldContain(faction.Id);
+        }
+
+        [Fact(DisplayName = "A character can leave a faction")]
+        public void CharcaterLeaveAFaction()
+        {
+            var character = new Character();
+            var faction = new Faction();
+
+            faction.AddMember(character);
+            faction.RemoveMember(character);
+            faction.Members.ShouldNotContain(character);
+            character.FactionIds.ShouldNotContain(faction.Id);
+        }
+
+        [Fact(DisplayName = "Two Characters who joined the same faction can't fight")]
+        public void TwoCharacterInTheSameFactionCantFight()
+        {
+            var faction = new Faction();
+            var character1 = new Character();
+            var character2 = new Character();
+
+            faction.AddMember(character1);
+            faction.AddMember(character2);
+
+            character1.Attacks(character2, 100);
+            character2.Health.ShouldBe(1000);
+        }
+
+        [Fact(DisplayName = "One character from a faction attacks an unfactioned character")]
+        public void TwoCharacterFromDifferentFactionFight()
+        {
+            var faction = new Faction();
+            var character1 = new Character();
+            var character2 = new Character();
+
+            faction.AddMember(character1);
+
+            character1.Attacks(character2, 100);
+            character2.Health.ShouldBe(900);
+        }
+
+        [Fact(DisplayName = "Two charcters from the same faction can Heal themselve")]
+        public void TwoCharacyersFromSameFactionCanHealThemeselve()
+        {
+            var faction = new Faction();
+            var character1 = new Character();
+            var character2 = new Character();
+            var character3 = new Character();
+
+            faction.AddMember(character1);
+            faction.AddMember(character2);
+
+            character3.Attacks(character2, 100);
+            character3.HealSomeone(character2);
+            character2.Health.ShouldBe(900);
+            
+            character1.HealSomeone(character2);
+            character2.Health.ShouldBe(1000);
         }
     }
 }
