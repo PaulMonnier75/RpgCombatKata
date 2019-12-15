@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace RpgCombatKata.Models
 {
@@ -17,16 +18,16 @@ namespace RpgCombatKata.Models
         public void AddMember(Character newMember)
         {
             Members.Add(newMember);
-            newMember.JoinFaction(Id);
+            newMember.BaseEquipement.JoinFaction(Id);
         }
 
         public void RemoveMember(Character oldMember)
         {
             Members.Remove(oldMember);
-            oldMember.LeaveFaction(Id);
+            oldMember.BaseEquipement.LeaveFaction(Id);
         }
 
-        public bool CanAttack(Character attacker, Character victim) 
-            => !Members.Contains(attacker) || !Members.Contains(victim);
+        public static bool IsInTheSameFaction(Character character1, Character character2)
+            => character1.BaseEquipement.FactionIds.Intersect(character2.BaseEquipement.FactionIds).Any();
     }
 }

@@ -1,34 +1,38 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace RpgCombatKata.Models
 {
-    public class Character
+    public class HealthEquipment
     {
-        public List<Guid> FactionIds { get; protected set; }
-        public double Health { get; protected set; }
-        public int Level { get; protected set; }
-        public bool IsAlive { get; protected set; }
+        public double LifePoints { get; private set; }
+        public bool IsAlive { get; private set; }
 
-        public Character(bool isAlive = true, int level = 1)
+        public HealthEquipment(bool isAlive)
         {
-            Health = 1000;
-            Level = level;
             IsAlive = isAlive;
-            FactionIds = new List<Guid>();
+            LifePoints = 1000;
         }
 
-        private void ReceivedDamages(double damages)
+        public void ReceivedDamages(double damages)
         {
-            Health -= damages;
-
-            if (Health < 0) IsAlive = false;
+            LifePoints -= damages;
+            IsAlive = !(LifePoints <= 0);
         }
 
-        private double ComputeDemageToInflict(int victimLevel, double damage)
+        public void Heal() => LifePoints = IsAlive ? 1000 : LifePoints;
+    }
+
+    public class FightEquipment
+    {
+        public int AttackRange { get; set; }
+
+        public FightEquipment(int attackRange)
+            => AttackRange = attackRange;
+
+        public double ComputeDamageToInflict(int attackantLevel, int victimLevel, double damage)
         {
-            var levelDifference = victimLevel - Level;
+            var levelDifference = victimLevel - attackantLevel;
 
             if (levelDifference >= 5)
                 return (damage - damage * 0.5);
@@ -38,31 +42,54 @@ namespace RpgCombatKata.Models
 
             return damage;
         }
+    }
 
-        public void Attacks(Character targetedCharacter, int damages)
+    public class BaseEquipement
+    {
+        public int Level { get; protected set; }
+        public List<Guid> FactionIds { get; protected set; }
+
+        public BaseEquipement(int level)
         {
-            if (this == targetedCharacter || IsInTheSameFaction(targetedCharacter)) return;
-
-            var computedDamages = ComputeDemageToInflict(targetedCharacter.Level, damages);
-            targetedCharacter.ReceivedDamages(computedDamages);
+            Level = level;
+            FactionIds = new List<Guid>();
         }
 
-        private bool IsInTheSameFaction(Character otherCharacter) 
-            => otherCharacter.FactionIds.Intersect(FactionIds).Any();
+        public void JoinFaction(Guid factionId) => FactionIds.Add(factionId);
 
-        public void Heal()
+        public void LeaveFaction(Guid factionId) => FactionIds.Remove(factionId);
+    }
+
+
+    public abstract class Character
+    {
+        public readonly BaseEquipement BaseEquipement;
+        public readonly FightEquipment FightEquipment;
+        public readonly HealthEquipment HealthEquipment;
+
+        protected Character(BaseEquipement baseEquipement, HealthEquipment healthEquipment, FightEquipment fightEquipment)
         {
-            if (IsAlive ) Health = 1000;
+            BaseEquipement = baseEquipement;
+            HealthEquipment = healthEquipment;
+            FightEquipment = fightEquipment;
+        }
+
+        public virtual void IsAttacked(double damages) => HealthEquipment.ReceivedDamages(damages);
+
+        public virtual void Attacks(Character targetedCharacter, int damages)
+        {
+            if (this == targetedCharacter || Faction.IsInTheSameFaction(this, targetedCharacter)) return;
+
+            var computedDamages = FightEquipment.ComputeDamageToInflict(
+                BaseEquipement.Level, targetedCharacter.BaseEquipement.Level, damages);
+
+            targetedCharacter.IsAttacked(computedDamages);
         }
 
         public void HealSomeone(Character injuredCharacter)
         {
-            if (injuredCharacter.IsAlive && IsInTheSameFaction(injuredCharacter))
-                injuredCharacter.Health = 1000;
+            if (injuredCharacter.HealthEquipment.IsAlive && Faction.IsInTheSameFaction(this, injuredCharacter))
+                injuredCharacter.HealthEquipment.Heal();
         }
-
-        public void JoinFaction(Guid factionId) => FactionIds.Add(factionId);
-        
-        public void LeaveFaction(Guid factionId) => FactionIds.Remove(factionId);
     }
 }
