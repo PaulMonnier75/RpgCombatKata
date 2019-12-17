@@ -2,12 +2,16 @@
 {
     public class MeleeFighter : Character
     {
-        public MeleeFighter(bool isAlive = true, int level = 1)
+        public MeleeFighter(bool isAlive = true, int level = 1, int x = 0, int y = 0)
             : base(
+                InitializePosition(x, y),
                 InitializeBaseEquipment(level),
                 InitalizeHealthEquipment(isAlive),
                 InitializeFightEquipment())
         { }
+
+        private static Position InitializePosition(int x, int y)
+            => new Position(x, y);
 
         private static HealthEquipment InitalizeHealthEquipment(bool isAlive)
             => new HealthEquipment(isAlive);
@@ -21,12 +25,16 @@
 
     public class RangedFighter : Character
     {
-        public RangedFighter(bool isAlive = true, int level = 1)
+        public RangedFighter(bool isAlive = true, int level = 1, int x = 0, int y = 0)
             : base(
+                InitializePosition(x, y),
                 InitializeBaseEquipment(level),
                 InitalizeHealthEquipment(isAlive),
                 InitializeFightEquipment())
         { }
+
+        private static Position InitializePosition(int x, int y)
+            => new Position(x, y);
 
         private static HealthEquipment InitalizeHealthEquipment(bool isAlive)
             => new HealthEquipment(isAlive);
