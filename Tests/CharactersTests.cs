@@ -184,5 +184,20 @@ namespace Tests
             meleeFighter.FightEquipment.AttackRange.ShouldBe(2);
             rangedFighter.FightEquipment.AttackRange.ShouldBe(20);
         }
+
+        [Fact(DisplayName = "Fighter is not able to attack another character out of range")]
+        public void CheckFighterAttackRange()
+        {
+            var meleeFighter = new MeleeFighter(x: 0, y: 0);
+            var rangedFighter = new RangedFighter(x: 12, y: 10);
+
+            meleeFighter.Attacks(rangedFighter, 20);
+            rangedFighter.HealthEquipment.LifePoints.ShouldBe(1000);
+            rangedFighter.HealthEquipment.IsAlive.ShouldBe(true);
+
+            rangedFighter.Attacks(meleeFighter, 20);
+            meleeFighter.HealthEquipment.LifePoints.ShouldBe(980);
+            meleeFighter.HealthEquipment.IsAlive.ShouldBe(true);
+        }
     }
 }

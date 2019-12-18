@@ -22,7 +22,9 @@
 
         public virtual void Attacks(Character targetedCharacter, int damages)
         {
-            if (this == targetedCharacter || Faction.IsInTheSameFaction(this, targetedCharacter)) return;
+            if (this == targetedCharacter || Faction.IsInTheSameFaction(this, targetedCharacter) ||
+                Position.GetDistanceBetween(targetedCharacter.Position) > FightEquipment.AttackRange) 
+                return;
 
             var computedDamages = FightEquipment.ComputeDamageToInflict(
                 BaseEquipement.Level, targetedCharacter.BaseEquipement.Level, damages);
